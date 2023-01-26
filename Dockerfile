@@ -1,16 +1,14 @@
-FROM golang:bullseye AS builder
-WORKDIR /goapp 
-
+FROM golang:1.14.2-alpine AS builder
+WORKDIR /goapp
 COPY main.go .
-RUN  go mod init main.go && go build -o main .
-RUN useradd -u 10001 exec
+RUN go env -w GO111MODULE=off
+RUN go build -o main .
 
 FROM alpine AS runtime
 WORKDIR /goapp
-COPY --from=builder /etc/passwd /etc/passwd
-USER exec
 COPY --from=builder /goapp/main .
-CMD [./main]
+ENTRYPOINT ["./main"]
+EXPOSE 8080
 
 
 
